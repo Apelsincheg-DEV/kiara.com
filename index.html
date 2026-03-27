@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kiara Gallery</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: radial-gradient(circle at top, #1a1a1f, #0b0b0d);
+  --glass: rgba(255,255,255,0.05);
+  --text: #f4f4f5;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* HEADER */
+header {
+  text-align: center;
+  padding: 60px 20px 20px;
+}
+
+h1 {
+  font-size: 48px;
+  margin: 0;
+  background: linear-gradient(90deg, #fff, #aaa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  opacity: 0.6;
+  margin-top: 10px;
+}
+
+/* ГАЛЕРЕЯ */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+  padding: 40px;
+}
+
+.card {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  background: var(--glass);
+  transition: 0.4s;
+}
+
+.card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+}
+
+.card img {
+  width: 100%;
+  display: block;
+  transition: 0.4s;
+}
+
+.card:hover img {
+  transform: scale(1.08);
+}
+
+/* LIGHTBOX */
+.lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.3s;
+}
+
+.lightbox.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.lightbox img {
+  max-width: 85%;
+  max-height: 85%;
+  border-radius: 16px;
+  box-shadow: 0 0 40px rgba(255,255,255,0.1);
+  animation: zoom 0.3s ease;
+}
+
+@keyframes zoom {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* КНОПКИ */
+.nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 40px;
+  color: white;
+  cursor: pointer;
+  user-select: none;
+  padding: 20px;
+  opacity: 0.6;
+  transition: 0.2s;
+}
+
+.nav-btn:hover {
+  opacity: 1;
+  transform: translateY(-50%) scale(1.2);
+}
+
+.prev { left: 20px; }
+.next { right: 20px; }
+
+/* закрыть */
+.close {
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  font-size: 35px;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.close:hover {
+  opacity: 1;
+}
+
+/* фон частицы */
+.bg-glow {
+  position: fixed;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(255,255,255,0.05), transparent);
+  top: -200px;
+  left: -200px;
+  animation: move 10s infinite alternate;
+}
+
+@keyframes move {
+  to {
+    transform: translate(300px,300px);
+  }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="bg-glow"></div>
+
+<header>
+  <h1>Kiara</h1>
+  <div class="subtitle">премиум галерея кошки</div>
+</header>
+
+<div class="gallery" id="gallery"></div>
+
+<div class="lightbox" id="lightbox">
+  <div class="close" id="close">✕</div>
+  <div class="nav-btn prev" id="prev">⟨</div>
+  <img id="lightbox-img">
+  <div class="nav-btn next" id="next">⟩</div>
+</div>
+
+<script>
+const images = [
+  "photo_1_2026-03-27_12-24-09.jpg",
+  "photo_2_2026-03-27_12-24-09.jpg",
+  "photo_3_2026-03-27_12-24-09.jpg",
+  "photo_4_2026-03-27_12-24-09.jpg",
+  "photo_5_2026-03-27_12-24-09.jpg",
+  "photo_6_2026-03-27_12-24-09.jpg",
+  "photo_7_2026-03-27_12-24-09.jpg",
+  "photo_8_2026-03-27_12-24-09.jpg"
+];
+
+const gallery = document.getElementById("gallery");
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightbox-img");
+
+let current = 0;
+
+// создаем галерею
+images.forEach((src, index) => {
+  const div = document.createElement("div");
+  div.className = "card";
+  div.innerHTML = `<img src="${src}">`;
+  div.onclick = () => openLightbox(index);
+  gallery.appendChild(div);
+});
+
+function openLightbox(index) {
+  current = index;
+  lightbox.classList.add("active");
+  lightboxImg.src = images[current];
+}
+
+function showNext() {
+  current = (current + 1) % images.length;
+  lightboxImg.src = images[current];
+}
+
+function showPrev() {
+  current = (current - 1 + images.length) % images.length;
+  lightboxImg.src = images[current];
+}
+
+document.getElementById("next").onclick = showNext;
+document.getElementById("prev").onclick = showPrev;
+document.getElementById("close").onclick = () => lightbox.classList.remove("active");
+
+// клавиши
+document.addEventListener("keydown", (e) => {
+  if (!lightbox.classList.contains("active")) return;
+
+  if (e.key === "ArrowRight") showNext();
+  if (e.key === "ArrowLeft") showPrev();
+  if (e.key === "Escape") lightbox.classList.remove("active");
+});
+
+// клик вне
+lightbox.addEventListener("click", (e) => {
+  if (e.target === lightbox) lightbox.classList.remove("active");
+});
+</script>
+
+</body>
+</html>
